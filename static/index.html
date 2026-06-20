@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniMatrix - AI Math & Science Animation Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-cube logo-icon animate-glow"></i>
+                <div class="logo-text">
+                    <h1>AniMatrix</h1>
+                    <span>AI-Powered Animation Engine</span>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-badge connected">
+                    <span class="status-dot animate-pulse"></span>
+                    <span>Gemini-2.5 & Manim Connected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT PANEL: CONTROLS & TIMELINE -->
+            <section class="panel control-panel" id="panel-controls">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-wand-magic-sparkles text-gradient"></i> Generator</h2>
+                </div>
+                <div class="panel-body">
+                    <!-- Generation Input -->
+                    <div class="input-group">
+                        <label for="prompt-input">Animation Prompt</label>
+                        <textarea id="prompt-input" placeholder="Describe the scene you want to animate... e.g. Show Pythagorean Theorem proof using squares and text labels."></textarea>
+                        <button id="btn-generate" class="btn btn-primary btn-glow">
+                            <i class="fa-solid fa-play"></i> <span>Generate Scene</span>
+                        </button>
+                    </div>
+
+                    <!-- History and Timeline Section -->
+                    <div class="history-section">
+                        <div class="section-title-bar">
+                            <h3><i class="fa-solid fa-folder-open"></i> Scenes Repository</h3>
+                            <button id="btn-refresh-history" class="btn-icon" title="Refresh list"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                        
+                        <div id="scenes-list" class="scenes-list">
+                            <!-- Populated by JS -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-video-slash"></i>
+                                <p>No scenes generated yet.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Stitching Timeline -->
+                    <div class="stitch-section">
+                        <div class="section-title-bar">
+                            <h3><i class="fa-solid fa-film"></i> Timeline Stitcher</h3>
+                        </div>
+                        <p class="timeline-help">Select multiple scenes from repository to stitch them together into a single movie.</p>
+                        <div id="timeline-slots" class="timeline-slots">
+                            <!-- Stitch slots populating by selection -->
+                            <div class="empty-timeline">Select clips below to queue...</div>
+                        </div>
+                        <button id="btn-stitch" class="btn btn-secondary w-full" disabled>
+                            <i class="fa-solid fa-scissors"></i> Stitch Selected Scenes
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MIDDLE PANEL: CODE WORKSPACE -->
+            <section class="panel workspace-panel" id="panel-editor">
+                <div class="panel-header flex-between">
+                    <h2><i class="fa-solid fa-code text-gradient"></i> Manim Code Workspace</h2>
+                    <div class="editor-actions">
+                        <span id="active-scene-name" class="scene-name-badge">new_scene.py</span>
+                        <button id="btn-render" class="btn btn-success" disabled>
+                            <i class="fa-solid fa-video"></i> Render Code
+                        </button>
+                        <button id="btn-download-code" class="btn btn-outline-icon" title="Download Code" disabled>
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body flex-col no-padding relative">
+                    <!-- Monaco Editor Target -->
+                    <div id="editor-container" class="editor-container"></div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: PREVIEW & BUILD OUTPUT -->
+            <section class="panel preview-panel" id="panel-preview">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-circle-play text-gradient"></i> Output & Status</h2>
+                </div>
+                <div class="panel-body flex-col">
+                    <!-- Video Preview Player Container -->
+                    <div class="video-preview-container">
+                        <div id="video-placeholder" class="video-placeholder">
+                            <i class="fa-solid fa-clapperboard play-icon"></i>
+                            <p>Generate or select a scene to preview</p>
+                        </div>
+                        <video id="video-player" controls preload="auto" class="hidden">
+                            <source id="video-source" src="" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div id="render-loading-overlay" class="loading-overlay hidden">
+                            <div class="spinner-glow"></div>
+                            <span class="loading-status">Compiling Scene...</span>
+                            <span class="loading-substatus">This may take 10-30 seconds</span>
+                        </div>
+                    </div>
+
+                    <!-- Downloader -->
+                    <div class="video-actions flex-between">
+                        <span class="output-label">Render Quality: <strong>720p30</strong></span>
+                        <a id="btn-download-video" class="btn btn-outline" href="#" download disabled>
+                            <i class="fa-solid fa-cloud-arrow-down"></i> Download Video
+                        </a>
+                    </div>
+
+                    <!-- Console logs Terminal -->
+                    <div class="terminal-container">
+                        <div class="terminal-header">
+                            <span><i class="fa-solid fa-terminal"></i> Build Logs</span>
+                            <div class="terminal-controls">
+                                <button id="btn-clear-console" class="btn-link" title="Clear console"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                        <div id="terminal-body" class="terminal-body">
+                            <div class="terminal-line system">System initialized. Awaiting prompt request...</div>
+                        </div>
+                        <div id="terminal-action-bar" class="terminal-action-bar hidden">
+                            <span class="error-msg"><i class="fa-solid fa-triangle-exclamation"></i> Compilation Failed</span>
+                            <button id="btn-auto-fix" class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-wrench"></i> Auto-Fix with AI
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Custom App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
